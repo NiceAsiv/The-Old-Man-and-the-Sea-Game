@@ -3,6 +3,11 @@ from typing import List, Dict, Any
 import time
 import math
 from game_entities import *
+import pygame
+from typing import List, Dict, Any
+import time
+import math
+
 class GameManager:
     def __init__(self, screen_width: int, screen_height: int):
         self.screen_width = screen_width
@@ -33,7 +38,7 @@ class GameManager:
         # 初始化游戏对象的位置
         self.fisherman = Fisherman([400, 360])  # 老人在海平面
         self.boat = Boat([400, 420])           # 船在海平面
-        self.marlin = Marlin([200, 700])       # 马林鱼在海中
+        self.marlin = Marlin([300, 400])       # 马林鱼在海中
         self.sharks = [Shark([600, 800])]      # 初始鲨鱼
         
         # 游戏统计数据
@@ -129,19 +134,30 @@ class GameManager:
             
     def render(self, screen: pygame.Surface):
         """渲染游戏画面"""
+        # 清空屏幕
+        screen.fill((135, 206, 235))  # 天蓝色背景
+        
         # 绘制背景
         screen.blit(self.background, (0, 0))
         
-        # 绘制游戏对象
-        self.boat.draw(screen)
-        self.fisherman.draw(screen)
+        # 按照深度顺序绘制游戏对象
+        # 先画远处的物体
         if self.state in [GameState.FISHING, GameState.FIGHTING_MARLIN]:
             self.marlin.draw(screen)
         for shark in self.sharks:
             shark.draw(screen)
             
+        # 然后画船和人物
+        self.boat.draw(screen)
+        self.fisherman.draw(screen)
+        
         # 绘制UI
         self._render_ui(screen)
+        
+        # Debug信息
+        debug_info = f"Fisherman pos: {self.fisherman.position}"
+        debug_surf = self.font.render(debug_info, True, (255, 255, 255))
+        screen.blit(debug_surf, (10, 100))
         
     def _render_ui(self, screen: pygame.Surface):
         """渲染UI元素"""
