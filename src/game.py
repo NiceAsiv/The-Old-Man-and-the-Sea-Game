@@ -249,6 +249,45 @@ class Fisherman:
     def trade_with_merchant(self, merchant: Merchant):
         merchant.trade(self)
         
+def run_sequence(fisherman_pos, boat_pos, marlin_pos, shark_pos):
+    """根据时序图，执行简易的捕捉逻辑."""
+    # 简单状态机示例
+    global game_state
+    if game_state == "TRAVELING":
+        boat_pos[0] += 2
+        if boat_pos[0] > 300:  # 航行至目标区域
+            game_state = "SEARCHING"
+
+    elif game_state == "SEARCHING":
+        # 渔夫观察马林鱼
+        if abs(boat_pos[0] - marlin_pos[0]) < 100:
+            game_state = "CAPTURING"
+
+    elif game_state == "CAPTURING":
+        # 模拟捕捉成功或失败
+        if random.random() > 0.5:
+            # 捕捉成功
+            marlin_pos[0] = boat_pos[0]  # 假装装载
+            # 吸引鲨鱼
+            if abs(shark_pos[0] - boat_pos[0]) < 200:
+                shark_pos[0] += 1  # 靠近船只
+                # 攻击鲨鱼
+                if random.random() > 0.5:
+                    shark_pos[0] = -999  # 鲨鱼被击退
+            # 准备返航
+            game_state = "RETURNING"
+        else:
+            # 捕捉失败
+            marlin_pos[0] += 5  # 马林鱼逃脱
+            game_state = "RETURNING"
+
+    elif game_state == "RETURNING":
+        boat_pos[0] -= 2
+        if boat_pos[0] < 50:
+            # 安全返航
+            print("渔夫与马林鱼安全抵达岸边，游戏结束.")
+            pygame.quit()
+            sys.exit()
 
 
 def main():
@@ -272,7 +311,7 @@ def main():
     shark_img = pygame.image.load("../assets/shark.png").convert_alpha()
     shark_img = pygame.transform.scale(shark_img, (shark_img.get_width() // 2, shark_img.get_height() // 2))
 
-    marlin_img = pygame.image.load("../assets/marha_fish.png").convert_alpha()
+    marlin_img = pygame.image.load("../assets/marlin_fish.png").convert_alpha()
     marlin_img = pygame.transform.scale(marlin_img, (marlin_img.get_width() // 3, marlin_img.get_height() // 3))
 
     pygame.mixer.music.load("../assets/sound/Calm_ocean _waves.mp3")
