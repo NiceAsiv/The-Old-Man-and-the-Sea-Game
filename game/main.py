@@ -4,24 +4,37 @@ from sprites import Boat, Fisherman, Hook, Marlin, Shark, HookState
 import pygame
 import random
 import math
+import time
 from sprites import (Boat, Fisherman, Hook, Marlin, Shark, 
                     DEEP_BLUE, WHITE) 
+from video_player import VideoPlayer
+import os
+from moviepy.editor import *
 
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
         self.screen_width = 1200
         self.screen_height = 768
         self.screen = pygame.display.set_mode((self.screen_width, 
                                              self.screen_height))
-        pygame.display.set_caption("老人与海")
-        
+        pygame.display.set_caption("老人与海")        
         self.game_logic = GameLogic(self.screen_width, self.screen_height)
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(None, 36)
-        
+
+        self.sounds = {
+            'cheers': pygame.mixer.Sound('assets/sound/Cheers.mp3'),
+            'attack': pygame.mixer.Sound('assets/sound/attack.mp3'),
+            'ocean': pygame.mixer.Sound('assets/sound/Calm_ocean_waves.mp3')
+        }
+        self.sounds['ocean'].set_volume(0.5)
+        # 初始化游戏对象
         self.init_game_objects()
-        
+        self.has_played_intro = False
+            
+                
     def init_game_objects(self):
         self.boat = Boat(self.screen_width//2, self.screen_height//2)
         self.fisherman = Fisherman(self.boat.x + 16, self.boat.y - 16)
@@ -34,6 +47,15 @@ class Game:
                            random.randint(0, self.screen_height)) 
                       for _ in range(2)]
         
+        self.game_logic.set_sounds(self.sounds)
+    
+    def play_intro(self):
+        """播放游戏介绍视频"""
+        video_file = os.path.join("assets", "video", "intro.mp4")
+        player = VideoPlayer(self.screen)
+        player.play_video(video_file)
+        
+                        
     def handle_input(self):
         keys = pygame.key.get_pressed()
         
@@ -169,6 +191,9 @@ class Game:
     def run(self):
         running = True
         while running:
+            if not self.has_played_intro:
+                 self.play_intro()
+            self.has_played_intro = True
             current_time = pygame.time.get_ticks()  # 获取当前时间
             
             for event in pygame.event.get():
@@ -247,7 +272,7 @@ class Game:
             
             pygame.display.flip()
             self.clock.tick(60)
-            
+        pygame.mixer.quit()    
         pygame.quit()
         
 if __name__ == "__main__":

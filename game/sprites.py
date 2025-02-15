@@ -177,7 +177,7 @@ class Fisherman(GameObject):
         self.money = 0
         self.attack_power = 1.0
         self.hook_strength = 1.0
-        self.fishing_speed = 1.0
+        self.fishing_speed = 0.1
         self.is_attacking = False  # 是否正在攻击
         self.rect = pygame.Rect(x, y, 48, 48)
         self.javelin = Javelin(x + 24, y + 24)  # 创建标枪

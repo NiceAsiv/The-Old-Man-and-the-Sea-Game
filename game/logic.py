@@ -17,10 +17,12 @@ class GameLogic:
         self.attacking_shark = None
         self.shop = Shop()
         self.fisherman = None # 渔夫对象
+        self.sounds = None
     
     def set_fisherman(self, fisherman):
         self.fisherman = fisherman
-        
+    def set_sounds(self, sounds):
+        self.sounds = sounds    
     def update_hook(self, hook: Hook, fisherman: Fisherman, marlins: List[Marlin], sharks: List[Shark]):
         if hook.state == HookState.IDLE:
             hook.x = fisherman.x + 16
@@ -188,8 +190,6 @@ class GameLogic:
             # 设置攻击状态
             marlin.being_attacked = True
             
-            
-            
             # 计算鲨鱼对马林鱼的伤害
             base_damage = shark.attackPower * 5  # 基础伤害
             vitality_multiplier = 1.0 if shark.vitality > 50 else 0.5  # 生命值影响
@@ -207,7 +207,10 @@ class GameLogic:
             marlin.weight = max(0, marlin.weight - actual_damage)
         
             # 对马林鱼造成伤害
-            marlin.weight -= 5
+            marlin.weight -= actual_damage
+            if self.sounds:
+                self.sounds["attack"].play()
+                
             if marlin.weight <= 0:
                 shark.foodCapacity += marlin.initial_weight * 0.2  # 鲨鱼获得食物
                 shark.is_attacking = False
@@ -271,6 +274,8 @@ class GameLogic:
     def handle_caught_marlin(self, marlin, fisherman):
         self.current_marlin_weight += marlin.weight  # 累加重量
         self.score += marlin.weight
+        if self.sounds:
+            self.sounds["cheers"].play()
         
     def sell_marlin(self, fisherman):
         if self.current_marlin_weight > 0:
